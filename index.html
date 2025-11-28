@@ -57,166 +57,156 @@
             });
         };
 
+        // --- Business Logic: Dynamic Interest Rate ---
+        const getDynamicInterestRate = (amount) => {
+            if (amount >= 500000) return 3; // 1.2% for High Value (>5 Lakh)
+            if (amount >= 100000) return 5; // 1.5% for Medium Value (>1 Lakh)
+            if (amount >= 40000) return 6; // 1.5% for Medium Value (>50 K)
+            return 8;                       // 2.0% for Small Value (<1 Lakh)
+        };
+
         // --- Mock Data ---
-        // Expanded with more closed loans and Taka values
+        // 1. Existing + 10 New Loans
+        // 2. Rates aligned with getDynamicInterestRate logic
         const LOANS = [
+            // Existing
             {
                 id: "GJ-2024-001",
                 status: "Active",
-                customer: {
-                    name: "Sarah Jenkins",
-                    phone: "+880 1711-123456",
-                    email: "sarah.j@example.com",
-                    address: "House 42, Road 7, Dhanmondi, Dhaka",
-                    idProof: "NID-987654321",
-                    image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah"
-                },
-                items: [
-                    { id: 1, type: "Gold Necklace", purity: "22K", grossWeight: 24.5, netWeight: 22.0, valuation: 180000 },
-                    { id: 2, type: "Bangle Set (2)", purity: "22K", grossWeight: 30.0, netWeight: 28.5, valuation: 240000 }
-                ],
-                loanDetails: {
-                    principal: 350000,
-                    interestRate: 1.5,
-                    startDate: "2024-01-15",
-                    dueDate: "2025-01-15",
-                    ltv: 75
-                },
-                payments: [
-                    { date: "2024-02-15", amount: 5250, type: "Interest" },
-                    { date: "2024-03-15", amount: 5250, type: "Interest" }
-                ]
+                customer: { name: "Sarah Jenkins", phone: "+880 1711-123456", email: "sarah.j@example.com", address: "House 42, Road 7, Dhanmondi, Dhaka", idProof: "NID-987654321", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah" },
+                items: [ { id: 1, type: "Gold Necklace", purity: "22K", grossWeight: 24.5, netWeight: 22.0, valuation: 180000 }, { id: 2, type: "Bangle Set (2)", purity: "22K", grossWeight: 30.0, netWeight: 28.5, valuation: 240000 } ],
+                loanDetails: { principal: 350000, interestRate: 1.5, startDate: "2024-01-15", dueDate: "2025-01-15", ltv: 75 },
+                payments: [ { date: "2024-02-15", amount: 5250, type: "Interest" }, { date: "2024-03-15", amount: 5250, type: "Interest" } ]
             },
             {
                 id: "GJ-2024-042",
                 status: "Overdue",
-                customer: {
-                    name: "Michael Chen",
-                    phone: "+880 1819-987654",
-                    email: "m.chen@example.com",
-                    address: "Apt 4B, Silver Tower, Gulshan 1, Dhaka",
-                    idProof: "PASS-123456",
-                    image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Michael"
-                },
-                items: [
-                    { id: 1, type: "Gold Ring", purity: "18K", grossWeight: 8.5, netWeight: 8.0, valuation: 45000 }
-                ],
-                loanDetails: {
-                    principal: 30000,
-                    interestRate: 2.0,
-                    startDate: "2023-11-01",
-                    dueDate: "2024-05-01",
-                    ltv: 60
-                },
+                customer: { name: "Michael Chen", phone: "+880 1819-987654", email: "m.chen@example.com", address: "Apt 4B, Silver Tower, Gulshan 1, Dhaka", idProof: "PASS-123456", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Michael" },
+                items: [ { id: 1, type: "Gold Ring", purity: "18K", grossWeight: 8.5, netWeight: 8.0, valuation: 45000 } ],
+                loanDetails: { principal: 30000, interestRate: 2.0, startDate: "2023-11-01", dueDate: "2024-05-01", ltv: 60 },
                 payments: []
             },
-            // --- Closed Loans ---
             {
                 id: "GJ-2023-089",
                 status: "Closed",
-                customer: {
-                    name: "Amara Patel",
-                    phone: "+880 1911-456789",
-                    email: "amara.p@example.com",
-                    address: "12 Gemstone Way, Uttara Sector 4",
-                    idProof: "NID-555666",
-                    image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Amara"
-                },
-                items: [
-                    { id: 1, type: "Bridal Set", purity: "24K", grossWeight: 85.0, netWeight: 82.0, valuation: 650000 }
-                ],
-                loanDetails: {
-                    principal: 500000,
-                    interestRate: 1.2,
-                    startDate: "2023-06-10",
-                    dueDate: "2024-06-10",
-                    ltv: 70
-                },
-                payments: [
-                    { date: "2023-12-10", amount: 536000, type: "Settlement" }
-                ]
+                customer: { name: "Amara Patel", phone: "+880 1911-456789", email: "amara.p@example.com", address: "12 Gemstone Way, Uttara Sector 4", idProof: "NID-555666", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Amara" },
+                items: [ { id: 1, type: "Bridal Set", purity: "24K", grossWeight: 85.0, netWeight: 82.0, valuation: 650000 } ],
+                loanDetails: { principal: 500000, interestRate: 1.2, startDate: "2023-06-10", dueDate: "2024-06-10", ltv: 70 },
+                payments: [ { date: "2023-12-10", amount: 536000, type: "Settlement" } ]
             },
             {
                 id: "GJ-2023-055",
                 status: "Closed",
-                customer: {
-                    name: "Rahim Ahmed",
-                    phone: "+880 1677-223344",
-                    email: "rahim.gold@example.com",
-                    address: "55 Old Town Road, Dhaka",
-                    idProof: "NID-112233",
-                    image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Rahim"
-                },
-                items: [
-                    { id: 1, type: "Gold Chain", purity: "21K", grossWeight: 15.0, netWeight: 14.5, valuation: 120000 }
-                ],
-                loanDetails: {
-                    principal: 80000,
-                    interestRate: 1.5,
-                    startDate: "2023-02-01",
-                    dueDate: "2023-08-01",
-                    ltv: 65
-                },
-                payments: [
-                    { date: "2023-03-01", amount: 1200, type: "Interest" },
-                    { date: "2023-05-15", amount: 82400, type: "Settlement" }
-                ]
+                customer: { name: "Rahim Ahmed", phone: "+880 1677-223344", email: "rahim.gold@example.com", address: "55 Old Town Road, Dhaka", idProof: "NID-112233", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Rahim" },
+                items: [ { id: 1, type: "Gold Chain", purity: "21K", grossWeight: 15.0, netWeight: 14.5, valuation: 120000 } ],
+                loanDetails: { principal: 80000, interestRate: 2.0, startDate: "2023-02-01", dueDate: "2023-08-01", ltv: 65 },
+                payments: [ { date: "2023-03-01", amount: 1600, type: "Interest" }, { date: "2023-05-15", amount: 82400, type: "Settlement" } ]
             },
             {
                 id: "GJ-2023-012",
                 status: "Closed",
-                customer: {
-                    name: "Fatima Begum",
-                    phone: "+880 1555-998877",
-                    email: "fatima.b@example.com",
-                    address: "Green Road, Farmgate",
-                    idProof: "NID-998877",
-                    image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Fatima"
-                },
-                items: [
-                    { id: 1, type: "Earrings", purity: "22K", grossWeight: 5.5, netWeight: 5.2, valuation: 40000 }
-                ],
-                loanDetails: {
-                    principal: 25000,
-                    interestRate: 1.8,
-                    startDate: "2023-01-10",
-                    dueDate: "2023-07-10",
-                    ltv: 60
-                },
-                payments: [
-                    { date: "2023-04-10", amount: 26350, type: "Settlement" }
-                ]
+                customer: { name: "Fatima Begum", phone: "+880 1555-998877", email: "fatima.b@example.com", address: "Green Road, Farmgate", idProof: "NID-998877", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Fatima" },
+                items: [ { id: 1, type: "Earrings", purity: "22K", grossWeight: 5.5, netWeight: 5.2, valuation: 40000 } ],
+                loanDetails: { principal: 25000, interestRate: 2.0, startDate: "2023-01-10", dueDate: "2023-07-10", ltv: 60 },
+                payments: [ { date: "2023-04-10", amount: 26350, type: "Settlement" } ]
             },
-             {
+            {
                 id: "GJ-2024-099",
                 status: "Active",
-                customer: {
-                    name: "Karim Uddin",
-                    phone: "+880 1300-556677",
-                    email: "karim.u@example.com",
-                    address: "Banani, Dhaka",
-                    idProof: "NID-778899",
-                    image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Karim"
-                },
-                items: [
-                    { id: 1, type: "Heavy Bracelet", purity: "22K", grossWeight: 50.0, netWeight: 48.0, valuation: 400000 }
-                ],
-                loanDetails: {
-                    principal: 250000,
-                    interestRate: 1.4,
-                    startDate: "2024-03-01",
-                    dueDate: "2025-03-01",
-                    ltv: 62
-                },
+                customer: { name: "Karim Uddin", phone: "+880 1300-556677", email: "karim.u@example.com", address: "Banani, Dhaka", idProof: "NID-778899", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Karim" },
+                items: [ { id: 1, type: "Heavy Bracelet", purity: "22K", grossWeight: 50.0, netWeight: 48.0, valuation: 400000 } ],
+                loanDetails: { principal: 250000, interestRate: 1.5, startDate: "2024-03-01", dueDate: "2025-03-01", ltv: 62 },
+                payments: []
+            },
+            // --- 10 NEW LOANS ---
+            {
+                id: "GJ-2024-100",
+                status: "Active",
+                customer: { name: "Nusrat Jahan", phone: "+880 1712-334455", email: "nusrat.j@example.com", address: "Mirpur 10, Dhaka", idProof: "NID-100200", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Nusrat" },
+                items: [ { id: 1, type: "Gold Tiara", purity: "21K", grossWeight: 45.0, netWeight: 42.0, valuation: 380000 } ],
+                loanDetails: { principal: 200000, interestRate: 1.5, startDate: "2024-01-05", dueDate: "2025-01-05", ltv: 52 },
+                payments: [ { date: "2024-02-05", amount: 3000, type: "Interest" } ]
+            },
+            {
+                id: "GJ-2024-101",
+                status: "Active",
+                customer: { name: "Abdul Malek", phone: "+880 1811-223344", email: "malek.a@example.com", address: "Keraniganj, Dhaka", idProof: "NID-101201", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Malek" },
+                items: [ { id: 1, type: "Gold Coin", purity: "24K", grossWeight: 10.0, netWeight: 10.0, valuation: 90000 } ],
+                loanDetails: { principal: 60000, interestRate: 2.0, startDate: "2024-02-20", dueDate: "2024-08-20", ltv: 66 },
+                payments: []
+            },
+            {
+                id: "GJ-2024-102",
+                status: "Overdue",
+                customer: { name: "Sumi Akter", phone: "+880 1922-334455", email: "sumi.a@example.com", address: "Badda, Dhaka", idProof: "NID-102202", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sumi" },
+                items: [ { id: 1, type: "Earring Set", purity: "22K", grossWeight: 8.0, netWeight: 7.5, valuation: 60000 } ],
+                loanDetails: { principal: 40000, interestRate: 2.0, startDate: "2023-10-10", dueDate: "2024-04-10", ltv: 66 },
+                payments: [ { date: "2023-11-10", amount: 800, type: "Interest" } ]
+            },
+            {
+                id: "GJ-2024-103",
+                status: "Active",
+                customer: { name: "Tanvir Hasan", phone: "+880 1677-889900", email: "tanvir.h@example.com", address: "Mohammadpur, Dhaka", idProof: "NID-103203", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Tanvir" },
+                items: [ { id: 1, type: "Heavy Chain", purity: "22K", grossWeight: 60.0, netWeight: 58.0, valuation: 480000 }, { id: 2, type: "Ring", purity: "22K", grossWeight: 10.0, netWeight: 9.5, valuation: 80000 } ],
+                loanDetails: { principal: 600000, interestRate: 1.2, startDate: "2024-03-10", dueDate: "2025-03-10", ltv: 70 }, // High value, low rate
+                payments: []
+            },
+            {
+                id: "GJ-2024-104",
+                status: "Closed",
+                customer: { name: "Rubina Khan", phone: "+880 1555-667788", email: "rubina.k@example.com", address: "Uttara Sector 11, Dhaka", idProof: "NID-104204", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Rubina" },
+                items: [ { id: 1, type: "Anklet", purity: "21K", grossWeight: 20.0, netWeight: 19.0, valuation: 150000 } ],
+                loanDetails: { principal: 100000, interestRate: 1.5, startDate: "2023-05-01", dueDate: "2024-05-01", ltv: 66 },
+                payments: [ { date: "2023-11-01", amount: 109000, type: "Settlement" } ]
+            },
+            {
+                id: "GJ-2024-105",
+                status: "Active",
+                customer: { name: "Jashim Uddin", phone: "+880 1300-112233", email: "jashim.u@example.com", address: "Savar, Dhaka", idProof: "NID-105205", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Jashim" },
+                items: [ { id: 1, type: "Gold Bar", purity: "24K", grossWeight: 50.0, netWeight: 50.0, valuation: 450000 } ],
+                loanDetails: { principal: 300000, interestRate: 1.5, startDate: "2024-01-20", dueDate: "2024-07-20", ltv: 66 },
+                payments: [ { date: "2024-02-20", amount: 4500, type: "Interest" } ]
+            },
+            {
+                id: "GJ-2024-106",
+                status: "Overdue",
+                customer: { name: "Moni Das", phone: "+880 1711-998877", email: "moni.d@example.com", address: "Shankhari Bazar, Dhaka", idProof: "NID-106206", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Moni" },
+                items: [ { id: 1, type: "Nose Pin", purity: "18K", grossWeight: 2.0, netWeight: 1.8, valuation: 12000 } ],
+                loanDetails: { principal: 8000, interestRate: 2.0, startDate: "2023-08-15", dueDate: "2024-02-15", ltv: 66 },
+                payments: []
+            },
+            {
+                id: "GJ-2024-107",
+                status: "Active",
+                customer: { name: "Faruk Hossain", phone: "+880 1819-554433", email: "faruk.h@example.com", address: "Motijheel, Dhaka", idProof: "NID-107207", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Faruk" },
+                items: [ { id: 1, type: "Watch", purity: "18K", grossWeight: 80.0, netWeight: 40.0, valuation: 250000 } ],
+                loanDetails: { principal: 150000, interestRate: 1.5, startDate: "2024-02-01", dueDate: "2025-02-01", ltv: 60 },
+                payments: []
+            },
+            {
+                id: "GJ-2024-108",
+                status: "Closed",
+                customer: { name: "Laila Parvin", phone: "+880 1911-223344", email: "laila.p@example.com", address: "Khilgaon, Dhaka", idProof: "NID-108208", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Laila" },
+                items: [ { id: 1, type: "Necklace", purity: "21K", grossWeight: 35.0, netWeight: 33.0, valuation: 280000 } ],
+                loanDetails: { principal: 180000, interestRate: 1.5, startDate: "2023-09-01", dueDate: "2024-09-01", ltv: 64 },
+                payments: [ { date: "2024-01-01", amount: 190800, type: "Settlement" } ]
+            },
+            {
+                id: "GJ-2024-109",
+                status: "Active",
+                customer: { name: "Biplob Kumar", phone: "+880 1677-112299", email: "biplob.k@example.com", address: "Rampura, Dhaka", idProof: "NID-109209", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Biplob" },
+                items: [ { id: 1, type: "Bracelet", purity: "22K", grossWeight: 15.0, netWeight: 14.0, valuation: 120000 } ],
+                loanDetails: { principal: 80000, interestRate: 2.0, startDate: "2024-03-05", dueDate: "2024-09-05", ltv: 66 },
                 payments: []
             }
         ];
 
         // --- Application State ---
         const state = {
-            view: 'dashboard', // dashboard, detail, profile
+            view: 'dashboard', 
             selectedLoan: null,
             searchTerm: '',
+            filterStatus: 'All', // 'All', 'Active', 'Overdue', 'Closed'
             currentUser: {
                 name: "Admin User",
                 role: "Branch Manager",
@@ -256,19 +246,25 @@
         }
 
         function getDashboardMetrics() {
-            // Requirement: Ensure dashboard summary only shows ACTIVE loans
-            const activeLoans = LOANS.filter(l => l.status === 'Active' || l.status === 'Overdue'); // Overdue is technically still active/unpaid
+            // Requirement: Ensure dashboard summary only shows ACTIVE loans for basic stats
+            const activeLoans = LOANS.filter(l => l.status === 'Active' || l.status === 'Overdue'); 
             
             const totalPrincipal = activeLoans.reduce((sum, l) => sum + l.loanDetails.principal, 0);
             const totalGoldWeight = activeLoans.reduce((sum, l) => sum + l.items.reduce((is, i) => is + i.grossWeight, 0), 0);
             
             // Calculate total pending amounts (Principal + Interest - Paid) for active loans
             let totalReceivable = 0;
+            // Calculate Projected Monthly Interest Revenue
+            let projectedMonthlyRevenue = 0;
+
             activeLoans.forEach(loan => {
                 const interest = calculateInterest(loan);
                 const paid = loan.payments.reduce((p, c) => p + c.amount, 0);
                 const pending = loan.loanDetails.principal + interest.totalAccrued - paid;
                 totalReceivable += Math.max(0, pending);
+                
+                // Monthly Revenue Projection
+                projectedMonthlyRevenue += interest.monthly;
             });
 
             return {
@@ -276,7 +272,8 @@
                 overdueCount: activeLoans.filter(l => l.status === 'Overdue').length,
                 totalPrincipal,
                 totalGoldWeight,
-                totalReceivable
+                totalReceivable,
+                projectedMonthlyRevenue
             };
         }
 
@@ -284,7 +281,7 @@
 
         function renderSidebar() {
             return `
-            <div class="hidden md:flex flex-col w-64 bg-slate-900 text-white min-h-screen fixed h-full">
+            <div class="hidden md:flex flex-col w-64 bg-slate-900 text-white min-h-screen fixed h-full z-20">
                 <div class="p-6 flex items-center space-x-2 border-b border-slate-700">
                     <div class="w-8 h-8 bg-yellow-500 rounded-lg flex items-center justify-center">
                         <i data-lucide="gem" class="w-5 h-5 text-slate-900"></i>
@@ -354,12 +351,32 @@
             `;
         }
 
+        function renderFilterButton(label, value) {
+            const isActive = state.filterStatus === value;
+            const activeClass = "bg-slate-800 text-white shadow-sm ring-1 ring-slate-800";
+            const inactiveClass = "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200";
+            
+            return `
+            <button 
+                onclick="setFilter('${value}')" 
+                class="px-3 py-1.5 text-sm font-medium rounded-md transition-all ${isActive ? activeClass : inactiveClass}">
+                ${label}
+            </button>
+            `;
+        }
+
         function renderDashboard() {
             const metrics = getDashboardMetrics();
-            const filteredLoans = LOANS.filter(loan => 
+            
+            // Filter Logic
+            let filteredLoans = LOANS.filter(loan => 
                 loan.customer.name.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
                 loan.id.toLowerCase().includes(state.searchTerm.toLowerCase())
             );
+
+            if (state.filterStatus !== 'All') {
+                filteredLoans = filteredLoans.filter(loan => loan.status === state.filterStatus);
+            }
 
             return `
             <div class="space-y-6 fade-in">
@@ -398,15 +415,16 @@
                         </div>
                     </div>
 
-                    <!-- Total Receivable -->
-                    <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between">
-                        <div>
-                            <p class="text-slate-500 text-xs font-medium uppercase tracking-wider">Total Receivable</p>
-                            <p class="text-xl font-bold text-yellow-600 mt-1">${formatCurrency(metrics.totalReceivable)}</p>
-                            <p class="text-[10px] text-slate-400">Principal + Interest Due</p>
+                    <!-- Monthly Revenue (New) -->
+                    <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between relative overflow-hidden group">
+                        <div class="absolute inset-0 bg-yellow-50 opacity-0 group-hover:opacity-50 transition-opacity"></div>
+                        <div class="relative z-10">
+                            <p class="text-slate-500 text-xs font-medium uppercase tracking-wider">Proj. Monthly Revenue</p>
+                            <p class="text-xl font-bold text-yellow-600 mt-1">${formatCurrency(metrics.projectedMonthlyRevenue)}</p>
+                            <p class="text-[10px] text-slate-400">Interest from Active Loans</p>
                         </div>
-                        <div class="w-10 h-10 bg-yellow-50 text-yellow-600 rounded-lg flex items-center justify-center">
-                            <i data-lucide="coins" class="w-5 h-5"></i>
+                        <div class="w-10 h-10 bg-yellow-100 text-yellow-600 rounded-lg flex items-center justify-center relative z-10">
+                            <i data-lucide="trending-up" class="w-5 h-5"></i>
                         </div>
                     </div>
 
@@ -424,17 +442,29 @@
 
                 <!-- Search & List -->
                 <div class="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden min-h-[500px]">
-                    <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row gap-4 justify-between items-center bg-slate-50/50">
-                        <h2 class="font-bold text-slate-800">All Loans (Active & Closed)</h2>
-                        <div class="relative w-full sm:w-64">
-                            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
-                            <input 
-                                type="text" 
-                                placeholder="Search ID or Name..." 
-                                value="${state.searchTerm}"
-                                oninput="handleSearch(this.value)"
-                                class="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500 transition-all"
-                            />
+                    <div class="p-4 border-b border-slate-100 flex flex-col gap-4 bg-slate-50/50">
+                        <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                            <h2 class="font-bold text-slate-800 flex items-center gap-2">
+                                Loan Portfolio
+                                <span class="text-xs font-normal text-slate-500 bg-white border px-2 py-0.5 rounded-full">${filteredLoans.length}</span>
+                            </h2>
+                            <div class="relative w-full sm:w-64">
+                                <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                                <input 
+                                    type="text" 
+                                    placeholder="Search ID or Name..." 
+                                    value="${state.searchTerm}"
+                                    oninput="handleSearch(this.value)"
+                                    class="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500 transition-all"
+                                />
+                            </div>
+                        </div>
+                        <!-- Filter Buttons -->
+                        <div class="flex flex-wrap gap-2">
+                            ${renderFilterButton('All Loans', 'All')}
+                            ${renderFilterButton('Active', 'Active')}
+                            ${renderFilterButton('Overdue', 'Overdue')}
+                            ${renderFilterButton('Closed', 'Closed')}
                         </div>
                     </div>
                     
@@ -455,8 +485,8 @@
                                         <span class="font-medium">${formatCurrency(loan.loanDetails.principal)}</span>
                                     </div>
                                     <div class="flex justify-between text-sm">
-                                        <span class="text-slate-500">Items</span>
-                                        <span class="font-medium">${loan.items.length} items</span>
+                                        <span class="text-slate-500">Interest Rate</span>
+                                        <span class="font-medium text-slate-600 bg-slate-100 px-1.5 rounded text-xs">${loan.loanDetails.interestRate}%/mo</span>
                                     </div>
                                 </div>
                                 <div class="mt-4 pt-3 border-t border-slate-50 text-xs text-slate-400 flex justify-between items-center">
@@ -467,7 +497,7 @@
                         `).join('') : `
                             <div class="col-span-full py-12 text-center text-slate-400">
                                 <i data-lucide="search-x" class="w-12 h-12 mx-auto mb-3 opacity-20"></i>
-                                <p>No loans found matching "${state.searchTerm}"</p>
+                                <p>No loans found matching filter.</p>
                             </div>
                         `}
                     </div>
@@ -821,6 +851,11 @@
         window.selectLoan = (loanId) => {
             state.selectedLoan = LOANS.find(l => l.id === loanId);
             state.view = 'detail';
+            render();
+        };
+
+        window.setFilter = (filter) => {
+            state.filterStatus = filter;
             render();
         };
 
